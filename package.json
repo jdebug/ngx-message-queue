@@ -1,6 +1,6 @@
 {
   "name": "ng2-message-queue",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A message queue for Angular 2+ application components to communication each other. `ng2-message-queue` supports message headers and payload. It also supports subscribers to subscribe to only messages with specific message header via 'msgSelector'. Message header supports only JSON object. Message payload can be any type.",
   "keywords" :["Angular","Library"],
   "license" : "MIT License. See more in LICENSE",

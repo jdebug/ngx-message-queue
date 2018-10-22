@@ -12,18 +12,16 @@ The implementation is based on RxJS.
 
 - [Install](#install)
 - [Usage](#usage)
-	- ["noImplicitAny": false](#noimplicitany-false)
-	- [Import into Angular 2 application (typescript)](#import-into-angular-2-application-typescript)
+	- [Import into Angular 2+ application (typescript)](#import-into-angular-2-application-typescript)
 	- [API](#api)
 		- [createQueue(name: string): boolean](#createqueuename-string-boolean)
 		- [deleteQueue(name: string): boolean](#deletequeuename-string-boolean)
 		- [getQueueNames(): string[]](#getqueuenames-string)
 		- [getSubscribers(): string[]](#getsubscribers-string)
 		- [publish(name: string, headers: any, message: any, lazy = true): boolean](#publishname-string-headers-any-message-any-lazy--true-boolean)
-		- [subscribe(name: string, msgSelector: string, callback: (any, any) => void, lazy = true): string](#subscribename-string-msgselector-any-callback-any-any--void-lazy--true-string)
+		- [subscribe(name: string, msgSelector: string, callback: (any, any) => void, lazy = true): string](#subscribename-string-msgselector-string-callback-any-any--void-lazy--true-string)
 		- [unsubscribe(id: string): boolean](#unsubscribeid-string-boolean)
 - [Example](#example)
-- [Changelog](#changelog)
 - [License](#license)
 
 ## Install
