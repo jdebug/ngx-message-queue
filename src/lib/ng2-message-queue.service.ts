@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs/Rx';
 import { UUID } from 'angular2-uuid';
 
-interface Channel {
+interface Queue {
 	[name: string]: {
 		subject: Subject<any>,
 		observable: Observable<any>
@@ -21,11 +21,11 @@ interface SubscribersList {
 })
 export class Ng2MessageQueue {
 
-	private channel: Channel = {};
+	private queues: Queue = {};
 	private subscribers: SubscribersList = {};
 
-	getQueues(): string[] {
-		return Object.keys(this.channel);
+	getQueueNames(): string[] {
+		return Object.keys(this.queues);
 	}
 
 	getSubscribers(): string[] {
@@ -33,18 +33,19 @@ export class Ng2MessageQueue {
 	}
 
 	createQueue(name: string): boolean {
-		if (name === undefined || this.channel[name]) {
+		if (name === undefined || this.queues[name]) {
 			return false;
 		}
 
-		let s = new Subject<any>();
-		let o = s.asObservable();
-		this.channel[name] = { subject: s, observable: o };
+		let subject = new Subject<any>();
+		let observable = subject.asObservable();
+		this.queues[name] = { subject: subject, observable: observable };
+
 		return true;
 	}
 
 	deleteQueue(name: string): boolean {
-		if (name === undefined || !this.channel[name]) {
+		if (name === undefined || !this.queues[name]) {
 			return false;
 		}
 
@@ -57,39 +58,54 @@ export class Ng2MessageQueue {
 		});
 
 		// delete queue 'name' subject and observable
-		delete this.channel[name].observable;
-		delete this.channel[name].subject;
-		delete this.channel[name];
+		delete this.queues[name].observable;
+		delete this.queues[name].subject;
+		delete this.queues[name];
 	}
 
-	publish(name: string, msg: any, lazy = true): boolean {
-		if (msg === undefined || name === undefined) {
+	publish(name: string, headers: any, message: any, lazy = true): boolean {
+		if (message === undefined || name === undefined) {
 			return false;
 		}
 
 		if (lazy) {
 			this.createQueue(name);
-		} else if (!this.channel[name]) {
+		} else if (!this.queues[name]) {
 			return false;
 		}
 
-		this.channel[name].subject.next(msg);
+		this.queues[name].subject.next({headers: headers, payload: message});
 		return true;
 	}
 
-	subscribe(name: string, callback: (any) => void, lazy = true): string {
+	subscribe(name: string, msgSelector: string, callback: (headers: any, payload: any) => void, lazy = true): string {
 		if (name === undefined || callback === undefined) {
 			return '';
 		}
 		if (lazy) {
 			this.createQueue(name);
-		} else if (!this.channel[name]) {
+		} else if (!this.queues[name]) {
 			return '';
 		}
 		let id = name + '-' + UUID.UUID();
+		let hName = '*';
+		let expr = '== *';
+
+		var parts = msgSelector.split(/(?=[=><!])/);		
+		if (parts.length > 1 ) {
+			hName = parts[0].trim();
+
+			// convert to js comparator
+			if (parts[1].startsWith('=')) {
+	            parts[1] = '=' + parts[1];
+	        }
+
+			expr = parts.slice(1, parts.length).join();
+		}
+
 		this.subscribers[id] = {
 			name: name,
-			subscription: this.channel[name].observable.subscribe(callback)
+			subscription: this.queues[name].observable.filter(s => eval(s.headers[hName] + expr)).subscribe(subject => callback(subject.headers, subject.payload))
 		}
 		return id;
 	}

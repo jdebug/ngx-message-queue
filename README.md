@@ -1,6 +1,11 @@
 # ng2-message-queue
 
 A message queue for Angular 2+ application components to communication each other.
+`ng2-message-queue` supports message headers and payload. It also supports subscribers
+to subscribe to only messages with specific message header via 'msgSelector'.
+
+Message header supports only JSON object. Message payload can be any type.
+
 The implementation is based on RxJS.
 
 ## Index
@@ -10,12 +15,12 @@ The implementation is based on RxJS.
 	- ["noImplicitAny": false](#noimplicitany-false)
 	- [Import into Angular 2 application (typescript)](#import-into-angular-2-application-typescript)
 	- [API](#api)
-		- [createQueue(name: string): boolean](#createQueuename-string-boolean)
-		- [deleteQueue(name: string): boolean](#delqueuename-string-boolean)
-		- [getQueues(): string[]](#getQueues-string)
-		- [getSubscribers(): string[]](#getsubscription-string)
-		- [publish(name: string, msg: any, lazy = true): boolean](#publishname-string-msg-any-lazy--true-boolean)
-		- [subscribe(name: string, callback: (any) => void, lazy = true): string](#subscribename-string-callback-any--void-lazy--true-string)
+		- [createQueue(name: string): boolean](#createqueuename-string-boolean)
+		- [deleteQueue(name: string): boolean](#deletequeuename-string-boolean)
+		- [getQueueNames(): string[]](#getqueuenames-string)
+		- [getSubscribers(): string[]](#getsubscribers-string)
+		- [publish(name: string, headers: any, message: any, lazy = true): boolean](#publishname-string-headers-any-message-any-lazy--true-boolean)
+		- [subscribe(name: string, msgSelector: string, callback: (any, any) => void, lazy = true): string](#subscribename-string-msgselector-any-callback-any-any--void-lazy--true-string)
 		- [unsubscribe(id: string): boolean](#unsubscribeid-string-boolean)
 - [Example](#example)
 - [Changelog](#changelog)
@@ -33,13 +38,13 @@ npm install ng2-message-queue
 
 `ng2-message-queue` is implemented as Angular 2+ injectable service name __Ng2MessageQueue__.
 
-__For app using angular version 6+__
+__For apps using angular version 6+__
 
 `Ng2MessageQueue` is Injectable as root so no additional decalaration is required in any module.
 
-__Each module to use Ng2MessageQueue__
-(required only for apps using angular version prior to 6)
-Add `Ng2MessageQueue` into module providers (eg. [app.module.ts](https://github.com/jdebug/ng2-message-queue/blob/master/app/app.module.ts)).
+__For apps using angular version prior to 6__
+
+Add `Ng2MessageQueue` into module providers.
 
 ```javascript
 import { Ng2MessageQueue } from 'ng2-message-queue';
@@ -56,7 +61,7 @@ import { Ng2MessageQueue } from 'ng2-message-queue';
 
 export class MyComponent {
 
-	constructor(private mq: Ng2MessageQueue) { }
+	constructor(private messageQueue: Ng2MessageQueue) { }
 
 }
 ```
@@ -70,7 +75,7 @@ export class MyComponent {
 Return `false` if queue `name` exist.
 
 ```javascript
-this.mq.createQueue('broadcast');
+this.messageQueue.createQueue('myQueue');
 ```
 
 ##### deleteQueue(name: string): boolean
@@ -80,26 +85,27 @@ this.mq.createQueue('broadcast');
 Return `false` if queue `name` does not exist.
 
 ```javascript
-this.mq.deleteQueue('broadcast');
+this.messageQueue.deleteQueue('myQueue');
 ```
 
-##### getQueues(): string[]
+##### getQueueNames(): string[]
 
-`getQueues` will return all queue name in string array.
+`getQueueNames` will return all queue name in string array.
 ```javascript
-let q: string[] = this.mq.getQueues();
+let qNames: string[] = this.messageQueue.getQueueNames();
 ```
 
 ##### getSubscribers(): string[]
 
 `getSubscribers` will return all subscription id in string array.
 ```javascript
-let ids: string[] = this.st.getSubscribers();
+let ids: string[] = this.messageQueue.getSubscribers();
 ```
 
-##### publish(name: string, msg: any, lazy = true): boolean
+##### publish(name: string, headers: any, message: any, lazy = true): boolean
 
-`publish` will put `msg` into queue `name`.
+`publish` will put `message` into queue `name`. It will also put `headers` into queue if any.
+`headers` are optional but it is best way to process/route/filter the messages quickly without parsing the message payload.
 
 If `lazy = true`(default), queue `name` will be created automatically if not exist yet.
 
@@ -108,17 +114,27 @@ Return true if successful.
 Return false if any of following is true:
 - `lazy = false`, and queue `name` does not exist.
 - `name` is undefined.
-- `msg` is undefined.
+- `message` is undefined.
 
 ```javascript
 // lazy mode
 message = 'This is a test message';
-this.mq.publish('testqueue', message);
+this.mq.publish('myQueue', {}, message);
 ```
 
-##### subscribe(name: string, callback: (any) => void, lazy = true): string
+##### subscribe(name: string, msgSelector: string, callback: (any, any) => void, lazy = true): string
 
-`subscribe` will link `callback` function to queue `name`. Whenever queue `name` receive a new message, `callback` will be invoked.
+`subscribe` will link `callback` function to queue `name`. Whenever queue `name` receives a new message, `callback` will be invoked. The callback will return both headers and message payload.
+
+Subscriber can `subscribe` to only certain messages with in the same queue. Let us say you have
+multiple subscribers listening for log messages with different logging level (debug, info, warn, fatal etc). If you want to configure high priority subscriber who listens for logs with 'fatal' 
+then use msgSelector as `loglevel=fatal`
+
+```javascript
+
+this.mq.subscribe('myQueue', 'loglevel=fatal', (headers, message) => this.handleMessage(headers, message));
+
+```
 
 If `lazy = true`(default), queue `name` will be created automatically if not exist yet.
 
@@ -135,10 +151,10 @@ __Lambda(fat arrow)__
 ```javascript
 
 ngOnInit() {
-	this.mq.subscribe('testqueue', payload => this.handleMessage(payload));
+	this.mq.subscribe('testqueue', '', (headers, message) => this.handleMessage(headers, message));
 }
 
-handleMessage(message) {
+handleMessage(headers, message) {
 	console.log(message);
 }
 ```
@@ -152,12 +168,12 @@ handleMessage(message) {
 ```javascript
 id: string;
 
-this.st.unsubscribe(this.id);
+this.messageQueue.unsubscribe(this.id);
 ```
 
 ## Example
 
-Github: [ng2-message-queue-example](https://github.com/jdebu/ng2-message-queue-example)
+Github: [ng2-message-queue-example](https://github.com/jdebug/ng2-message-queue-example)
 
 ## License
 
