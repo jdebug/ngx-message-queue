@@ -1,0 +1,17 @@
+{
+  "name": "ng2-message-queue",
+  "version": "0.0.3",
+  "description": "A message queue for Angular 2+ application components to communication each other. The implementation is based on RxJS.",
+  "keywords" :["Angular","Library"],
+  "license" : "MIT License. See more in LICENSE",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/jdebug/ng2-message-queue"
+  },
+  "homepage" :"https://www.jdebugger.com/angular-message-queue",
+  "peerDependencies": {
+    "@angular/common": "*",
+    "@angular/core": "*",
+    "angular2-uuid": "*"
+  }
+}
