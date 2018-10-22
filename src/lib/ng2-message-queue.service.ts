@@ -88,24 +88,30 @@ export class Ng2MessageQueue {
 			return '';
 		}
 		let id = name + '-' + UUID.UUID();
-		let hName = '*';
-		let expr = '== *';
+		let hName = '';
+		let expr = '';
+		let filterMsg = false;
 
-		var parts = msgSelector.split(/(?=[=><!])/);		
-		if (parts.length > 1 ) {
-			hName = parts[0].trim();
+		if (msgSelector !== undefined) {
+			var parts = msgSelector.split(/(?=[=><!])/);		
+			if (parts.length > 1 ) {
+				hName = parts[0].trim();
 
-			// convert to js comparator
-			if (parts[1].startsWith('=')) {
-	            parts[1] = '=' + parts[1];
-	        }
+				// convert to js comparator
+				if (parts[1].startsWith('=')) {
+		            parts[1] = '=' + parts[1];
+		        }
 
-			expr = parts.slice(1, parts.length).join();
+				expr = parts.slice(1, parts.length).join();
+				filterMsg = true;
+			} else {
+				filterMsg = false;
+			}
 		}
 
 		this.subscribers[id] = {
 			name: name,
-			subscription: this.queues[name].observable.filter(s => eval(s.headers[hName] + expr)).subscribe(subject => callback(subject.headers, subject.payload))
+			subscription: this.queues[name].observable.filter(s => {return filterMsg? eval(s.headers[hName] + expr) : true} ).subscribe(subject => callback(subject.headers, subject.payload))
 		}
 		return id;
 	}
