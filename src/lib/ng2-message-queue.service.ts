@@ -102,7 +102,7 @@ export class Ng2MessageQueue {
 		            parts[1] = '=' + parts[1];
 		        }
 
-				expr = parts.slice(1, parts.length).join();
+				expr = parts.slice(1, parts.length).join('');
 				filterMsg = true;
 			} else {
 				filterMsg = false;
