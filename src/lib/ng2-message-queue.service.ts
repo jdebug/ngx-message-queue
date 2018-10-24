@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs/Rx';
 import { UUID } from 'angular2-uuid';
+import { Tokenizer } from './utils/tokenizer';
+import { Expression } from './utils/expression';
 
 interface Queue {
 	[name: string]: {
@@ -88,31 +90,39 @@ export class Ng2MessageQueue {
 			return '';
 		}
 		let id = name + '-' + UUID.UUID();
-		let hName = '';
-		let expr = '';
-		let filterMsg = false;
+		// let hName = '';
+		// let expr = '';
+		// let filterMsg = false;
 
-		if (msgSelector !== undefined) {
-			var parts = msgSelector.split(/(?=[=><!])/);		
-			if (parts.length > 1 ) {
-				hName = parts[0].trim();
+		// if (msgSelector !== undefined) {
+		// 	var parts = msgSelector.split(/(?=[=><!])/);		
+		// 	if (parts.length > 1 ) {
+		// 		hName = parts[0].trim();
 
-				// convert to js comparator
-				if (parts[1].startsWith('=')) {
-		            parts[1] = '=' + parts[1];
-		        }
+		// 		// convert to js comparator
+		// 		if (parts[1].startsWith('=')) {
+		//             parts[1] = '=' + parts[1];
+		//         }
 
-				expr = parts.slice(1, parts.length).join('');
-				filterMsg = true;
-			} else {
-				filterMsg = false;
-			}
-		}
+		// 		expr = parts.slice(1, parts.length).join('');
+		// 		filterMsg = true;
+		// 	} else {
+		// 		filterMsg = false;
+		// 	}
+		// }
+
+		var token = Tokenizer.tokenizeExpression(msgSelector);
+
+		// this.subscribers[id] = {
+		// 	name: name,
+		// 	subscription: this.queues[name].observable.filter(s => {return filterMsg? eval(s.headers[hName] + expr) : true} ).subscribe(subject => callback(subject.headers, subject.payload))
+		// }
 
 		this.subscribers[id] = {
 			name: name,
-			subscription: this.queues[name].observable.filter(s => {return filterMsg? eval(s.headers[hName] + expr) : true} ).subscribe(subject => callback(subject.headers, subject.payload))
+			subscription: this.queues[name].observable.filter(s => {return Expression.eval(token, s.headers)} ).subscribe(subject => callback(subject.headers, subject.payload))
 		}
+
 		return id;
 	}
 
