@@ -111,7 +111,7 @@ export class Ng2MessageQueue {
 		// 	}
 		// }
 
-		var token = Tokenizer.tokenizeExpression(msgSelector);
+		var token = Tokenizer.tokenize(msgSelector);
 
 		// this.subscribers[id] = {
 		// 	name: name,

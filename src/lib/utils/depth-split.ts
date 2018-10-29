@@ -9,7 +9,7 @@ export class DepthSplit {
     var depth = 0;
     var start = 0;
     var result = [];
-    var zones = [];
+    var zones = DepthSplit.splitByGroup(text);
 
     // text.replace(/([\[\(\{])|([\]\)\}])/g, function(current, open, close, offset, e) {
     //   if (open) {
@@ -25,9 +25,9 @@ export class DepthSplit {
     //   }
     // });
 
-    if (depth === 0 && start < text.length) {
-      zones.push([start, text.length]);
-    }
+    // if (depth === 0 && start < text.length) {
+    //   zones.push([start, text.length]);
+    // }
 
     start = 0;
 
@@ -50,5 +50,33 @@ export class DepthSplit {
     }
 
     return result;
+  }
+
+
+  static splitByGroup(text) {
+    var depth = 0;
+    var start = 0;
+    var result = [];
+    var zones = [];
+
+    text.replace(/([\[\(\{])|([\]\)\}])/g, function(current, open, close, offset, e) {
+      if (open) {
+        if (depth === 0) {
+          zones.push([start, offset]);
+        }
+        depth += 1;
+      } else if (close) {
+        depth -= 1;
+        if (depth === 0) {
+          start = offset + current.length;
+        }
+      }
+    });
+
+    if (depth === 0 && start < text.length) {
+      zones.push([start, text.length]);
+    }
+
+    return zones;
   }
 }
