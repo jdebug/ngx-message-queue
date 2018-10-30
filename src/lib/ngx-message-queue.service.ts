@@ -21,7 +21,7 @@ interface SubscribersList {
 @Injectable({
   providedIn: 'root'
 })
-export class Ng2MessageQueue {
+export class NgxMessageQueue {
 
 	private queues: Queue = {};
 	private subscribers: SubscribersList = {};
