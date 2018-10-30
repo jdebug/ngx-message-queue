@@ -2,14 +2,14 @@
 
 A message queue for Angular 2+ application components to communication each other.
 `ngx-message-queue` supports message headers and payload. It also supports subscribers
-to subscribe to only messages with specific message header via 'msgSelector'.
+to subscribe to only messages with specific message header via 'msgSelector'(kind of a filter).
 
 Message header supports only JSON object. Message payload can be any type.
 
 The implementation is based on RxJS.
 
+`ng2-message-queue` has been renamed to `ngx-message-queue`
 
-`ngx-message-queue` 
 ## Index
 
 - [Install](#install)
