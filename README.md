@@ -8,13 +8,14 @@ Message header supports only JSON object. Message payload can be any type.
 
 The implementation is based on RxJS.
 
-`ng2-message-queue` has been renamed to `ngx-message-queue`
+`ng2-message-queue` has been renamed to `ngx-message-queue`.
 
 ## Index
 
 - [Install](#install)
 - [API](#api-details)
-- [Example](#example)
+- [Example Repo](#example-repo)
+- [Live Demo](#live-demo)
 - [License](#license)
 
 ## Install
@@ -28,9 +29,13 @@ npm install ngx-message-queue
 ](https://blog.jdebugger.com/2018/10/angular-message-queue.html)
 
 
-## Example
+## Example Repo
 
-Github: [ngx-message-queue-example](https://github.com/jdebug/ng2-message-queue-example)
+Github: [ng2-message-queue-example](https://github.com/jdebug/ng2-message-queue-example)
+
+## Live Demo
+
+[Try It!!](https://jdebug.github.io/ng2-message-queue-example/index.html)
 
 ## License
 
